@@ -314,5 +314,6 @@ class SqlaTableModelTestCase(SupersetTestCase):
             tbl.get_query_str(query_obj)
 
         self.assertTrue("Metric 'invalid' does not exist", context.exception)
+
     def test_architecture(self):
         self.assertTrue("Some architecture test", True)
