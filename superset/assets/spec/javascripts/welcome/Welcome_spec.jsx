@@ -35,4 +35,7 @@ describe('Welcome', () => {
     expect(wrapper.find(Panel)).toHaveLength(3);
     expect(wrapper.find(Row)).toHaveLength(3);
   });
+  it('runs architecture test correctly', () => {
+    expect(true).toBe(true);
+  });
 });

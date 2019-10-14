@@ -3370,7 +3370,7 @@ msgstr "Zugriffsanforderungen"
 
 #: superset/views/core.py:328 superset/views/core.py:567
 msgid "Security"
-msgstr "Sicherheit"
+msgstr "Sekurity"
 
 #: superset/views/core.py:335
 msgid "List Slices"
