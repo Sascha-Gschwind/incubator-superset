@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 """Unit tests for geocoding"""
-
+from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.engine import reflection
 
 from superset import db
@@ -38,34 +38,81 @@ class GeocodingTests(SupersetTestCase):
     def tearDown(self):
         self.logout()
 
-    def test_get_mapbox_api_key(self):
-        superset = views.Superset()
-        api_key = superset._get_mapbox_key()
-        assert isinstance(api_key, str)
+    def test_menu_entry_geocode_exist(self):
+        url = "/dashboard/list/"
+        dashboard_page = self.get_resp(url)
+        assert "Geocode Addresses" in dashboard_page
 
-    # def test_add_lat_lon_columns(self):
-    #     table = db.session.query(SqlaTable).first()
-    #     database = db.session.query(Database).filter_by(id=table.database_id).first()
-    #     database.allow_dml = True
-    #     db.session.commit()
-    #
-    #     table_name = table.table_name
-    #     lat_column_name = "lat"
-    #     lon_column_name = "lon"
-    #
-    #     columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
-    #     number_of_columns_before = len(columns)
-    #
-    #     views.Superset()._add_lat_lon_columns(
-    #         table_name, lat_column_name, lon_column_name
-    #     )
-    #
-    #     columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
-    #     number_of_columns_after = len(columns)
-    #     assert number_of_columns_after == number_of_columns_before + 2
-    #     column_names = [column["name"] for column in columns]
-    #     assert lon_column_name in column_names
-    #     assert lat_column_name in column_names
+    def test_geocode_adresses_view_load(self):
+        url = "/superset/geocoding"
+        form_get = self.get_resp(url)
+        assert "Geocode Addresses" in form_get
+
+    def test_get_editable_tables(self):
+        database = db.session.query(Database).first()
+        database.allow_dml = True
+        db.session.commit()
+
+        table_name = (
+            db.session.query(SqlaTable)
+            .filter_by(database_id=database.id)
+            .first()
+            .table_name
+        )
+
+        table_names = [table.name for table in views.Superset()._get_editable_tables()]
+        assert table_name in table_names
+
+    def test_get_columns(self):
+        url = "/superset/geocoding/columns"
+
+        table = db.session.query(SqlaTable).all()[0]
+        table_name = table.table_name
+
+        data = {"tableName": table_name}
+        response = self.get_resp(url, json_=data)
+        assert table.columns[0].column_name in response
+
+    def test_get_invalid_columns(self):
+        url = "/superset/geocoding/columns"
+        table_name = "no_table"
+
+        data = {"tableName": table_name}
+        response = self.get_resp(url, json_=data)
+
+        message = "No table found with name {0}".format(table_name)
+        assert message in response
+
+    def test_add_lat_lon_columns(self):
+        database = db.session.query(Database).first()
+        database.allow_dml = True
+        db.session.commit()
+        meta = MetaData()
+        employees = Table(
+            "employees",
+            meta,
+            Column("employee_id", Integer, primary_key=True),
+            Column("employee_name", String(60), nullable=False, key="name"),
+        )
+        employees.create(db.engine)
+
+        table_name = employees.name
+        lat_column_name = "lat"
+        lon_column_name = "lon"
+
+        columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
+        number_of_columns_before = len(columns)
+
+        views.Superset()._add_lat_lon_columns(
+            table_name, lat_column_name, lon_column_name
+        )
+
+        columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
+        number_of_columns_after = len(columns)
+        assert number_of_columns_after == number_of_columns_before + 2
+        column_names = [column["name"] for column in columns]
+        assert lon_column_name in column_names
+        assert lat_column_name in column_names
 
     def test_insert_geocoded_data(self):
         table_name = "birth_names"
@@ -88,33 +135,3 @@ class GeocodingTests(SupersetTestCase):
         )
         for row in result:
             assert row in data
-
-    def test_menu_entry_geocode_exist(self):
-        url = "/dashboard/list/"
-        dashboard_page = self.get_resp(url)
-        assert "Geocode Addresses" in dashboard_page
-
-    # def test_geocode_adresses_view_load(self):
-    # url = "/superset/geocoding"
-    # form_get = self.get_resp(url)
-    # assert "Geocode Addresses" in form_get
-
-    def test_get_columns(self):
-        url = "/superset/geocoding/columns"
-
-        table = db.session.query(SqlaTable).all()[0]
-        table_name = table.table_name
-
-        data = {"tableName": table_name}
-        response = self.get_resp(url, json_=data)
-        assert table.columns[0].column_name in response
-
-    def test_get_invalid_columns(self):
-        url = "/superset/geocoding/columns"
-        table_name = "no_table"
-
-        data = {"tableName": table_name}
-        response = self.get_resp(url, json_=data)
-
-        message = "No table found with name {0}".format(table_name)
-        assert message in response
