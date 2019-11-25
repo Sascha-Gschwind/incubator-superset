@@ -66,7 +66,7 @@ class GeocodingTests(SupersetTestCase):
     def test_get_columns(self):
         url = "/superset/geocoding/columns"
 
-        table = db.session.query(SqlaTable).all()[0]
+        table = db.session.query(SqlaTable).first()
         table_name = table.table_name
 
         data = {"tableName": table_name}
@@ -82,6 +82,26 @@ class GeocodingTests(SupersetTestCase):
 
         message = "No table found with name {0}".format(table_name)
         assert message in response
+
+    def test_does_valid_column_name_exist(self):
+        table = db.session.query(SqlaTable).first()
+        table_name = table.table_name
+        column_name = (
+            reflection.Inspector.from_engine(db.engine)
+            .get_columns(table_name)[0]
+            .get("name")
+        )
+
+        response = views.Superset()._does_column_name_exist(table_name, column_name)
+        assert True is response
+
+    def test_does_invalid_column_name_exist(self):
+        table = db.session.query(SqlaTable).first()
+        table_name = table.table_name
+        column_name = "no_column"
+
+        response = views.Superset()._does_column_name_exist(table_name, column_name)
+        assert False is response
 
     def test_add_lat_lon_columns(self):
         database = db.session.query(Database).first()
