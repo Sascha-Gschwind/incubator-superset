@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 """Unit tests for geocoding"""
+from unittest.mock import patch
+
 from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.engine import reflection
 
@@ -103,6 +105,26 @@ class GeocodingTests(SupersetTestCase):
         response = views.Superset()._does_column_name_exist(table_name, column_name)
         assert False is response
 
+    def test_load_data_from_all_columns(self):
+        table_name = "birth_names"
+        columns = ["name", "gender"]
+
+        data = views.Superset()._load_data_from_columns(
+            table_name, columns
+        )
+        assert ("Aaron", "boy") in data
+        assert ("Amy", "girl") in data
+
+    def test_load_data_from_columns_with_none(self):
+        table_name = "birth_names"
+        columns = ["name", None, "gender", None]
+
+        data = views.Superset()._load_data_from_columns(
+            table_name, columns
+        )
+        assert ("Aaron", "boy") in data
+        assert ("Amy", "girl") in data
+
     def test_add_lat_lon_columns(self):
         database = db.session.query(Database).first()
         database.allow_dml = True
@@ -155,3 +177,16 @@ class GeocodingTests(SupersetTestCase):
         )
         for row in result:
             assert row in data
+
+    def test_progress(self):
+        pass
+        # with patch('GeoCoder') as mock:
+        #     mock.____get_values_from_address.return_value = 'the result'
+        #
+        #     url = "/superset/geocoding/geocode"
+        #     self.get_resp(url)
+        #
+        #     url = "/superset/geocoding/progress"
+        #     response = self.get_resp(url)
+        #
+        #     assert response == None
