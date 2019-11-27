@@ -15,17 +15,20 @@
 # specific language governing permissions and limitations
 # under the License.
 """Unit tests for geocoding"""
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.engine import reflection
 
-from superset import db
+from superset import app, db
 from superset.connectors.sqla.models import SqlaTable
 from superset.models.core import Database
+from superset.utils.geocoding_utils import GeoCoder
 from superset.views import core as views
 
 from .base_tests import SupersetTestCase
+
+conf = app.config
 
 
 class GeocodingTests(SupersetTestCase):
@@ -109,9 +112,7 @@ class GeocodingTests(SupersetTestCase):
         table_name = "birth_names"
         columns = ["name", "gender"]
 
-        data = views.Superset()._load_data_from_columns(
-            table_name, columns
-        )
+        data = views.Superset()._load_data_from_columns(table_name, columns)
         assert ("Aaron", "boy") in data
         assert ("Amy", "girl") in data
 
@@ -119,9 +120,7 @@ class GeocodingTests(SupersetTestCase):
         table_name = "birth_names"
         columns = ["name", None, "gender", None]
 
-        data = views.Superset()._load_data_from_columns(
-            table_name, columns
-        )
+        data = views.Superset()._load_data_from_columns(table_name, columns)
         assert ("Aaron", "boy") in data
         assert ("Amy", "girl") in data
 
@@ -178,15 +177,35 @@ class GeocodingTests(SupersetTestCase):
         for row in result:
             assert row in data
 
+    # TODO Mock __get_values_from_address before create test
+    # def mocking_geocoded_data(self):
+    #     coordinates = ["47.224, 8.8181",
+    #                    "47.370, 8.544",
+    #                    "47.353, 8.492",
+    #                    "47.387, 8.574",
+    #                    "47.372, 8.539"]
+    #     for coordinate in coordinates:
+    #         yield coordinate
+
     def test_progress(self):
+        # data = [("Oberseestrasse 10 Rapperswil Switzerland"),
+        #         ("Grossmünsterplatz Zürich Switzerland"),
+        #         ("Uetliberg Switzerland"),
+        #         ("Zürichbergstrasse 221 Zürich Switzerland"),
+        #         ("Bahnhofstrasse Zürich, Switzerland")]
+        #
+        # geocoder = GeoCoder(conf)
+        # geocoder.__get_values_from_address = self.mocking_geocoded_data()
+        #
+        # print(geocoder.__get_values_from_address(""))
+        #
+        # url = "/superset/geocoding/geocode"
+        # response = self.get_resp(url, json_=data)
+        #
+        # url = "/superset/geocoding/progress"
+        # response = self.get_resp(url)
         pass
-        # with patch('GeoCoder') as mock:
-        #     mock.____get_values_from_address.return_value = 'the result'
-        #
-        #     url = "/superset/geocoding/geocode"
-        #     self.get_resp(url)
-        #
-        #     url = "/superset/geocoding/progress"
-        #     response = self.get_resp(url)
-        #
-        #     assert response == None
+
+    def test_interrupt(self):
+        # url = "/superset/geocoding/interrupt"
+        pass
