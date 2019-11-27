@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 """Unit tests for geocoding"""
-
+from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.engine import reflection
 from sqlalchemy_utils import table_name
 
@@ -29,8 +29,6 @@ from .base_tests import SupersetTestCase
 
 
 class GeocodingTests(SupersetTestCase):
-    superset = core.Superset()
-
     def __init__(self, *args, **kwargs):
         super(GeocodingTests, self).__init__(*args, **kwargs)
 
@@ -49,6 +47,23 @@ class GeocodingTests(SupersetTestCase):
         url = "/geocoder/geocoding"
         form_get = self.get_resp(url)
         assert "Geocode Addresses" in form_get
+
+    def test_get_editable_tables(self):
+        database = db.session.query(Database).first()
+        database.allow_dml = True
+        db.session.commit()
+
+        table_name = (
+            db.session.query(SqlaTable)
+            .filter_by(database_id=database.id)
+            .first()
+            .table_name
+        )
+
+        table_names = [
+            table.name for table in geocoding.Geocoder()._get_editable_tables()
+        ]
+        assert table_name in table_names
 
     def test_get_columns(self):
         url = "/geocoder/geocoding/columns"
@@ -75,29 +90,72 @@ class GeocodingTests(SupersetTestCase):
         message = "No columns found for table with name {0}".format(tableDto.name)
         assert message in response
 
-    # def test_add_lat_lon_columns(self):
-    #     table = db.session.query(SqlaTable).first()
-    #     database = db.session.query(Database).filter_by(id=table.database_id).first()
-    #     database.allow_dml = True
-    #     db.session.commit()
-    #
-    #     table_name = table.table_name
-    #     lat_column_name = "lat"
-    #     lon_column_name = "lon"
-    #
-    #     columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
-    #     number_of_columns_before = len(columns)
-    #
-    #     geocoding.Geocoder()._add_lat_lon_columns(
-    #         table_name, lat_column_name, lon_column_name
-    #     )
-    #
-    #     columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
-    #     number_of_columns_after = len(columns)
-    #     assert number_of_columns_after == number_of_columns_before + 2
-    #     column_names = [column["name"] for column in columns]
-    #     assert lon_column_name in column_names
-    #     assert lat_column_name in column_names
+    def test_does_valid_column_name_exist(self):
+        table = db.session.query(SqlaTable).first()
+        table_name = table.table_name
+        column_name = (
+            reflection.Inspector.from_engine(db.engine)
+            .get_columns(table_name)[0]
+            .get("name")
+        )
+
+        response = geocoding.Geocoder()._does_column_name_exist(table_name, column_name)
+        assert True is response
+
+    def test_does_invalid_column_name_exist(self):
+        table = db.session.query(SqlaTable).first()
+        table_name = table.table_name
+        column_name = "no_column"
+
+        response = geocoding.Geocoder()._does_column_name_exist(table_name, column_name)
+        assert False is response
+
+    def test_load_data_from_all_columns(self):
+        table_name = "birth_names"
+        columns = ["name", "gender"]
+
+        data = geocoding.Geocoder()._load_data_from_columns(table_name, columns)
+        assert ("Aaron", "boy") in data
+        assert ("Amy", "girl") in data
+
+    def test_load_data_from_columns_with_none(self):
+        table_name = "birth_names"
+        columns = ["name", None, "gender", None]
+
+        data = geocoding.Geocoder()._load_data_from_columns(table_name, columns)
+        assert ("Aaron", "boy") in data
+        assert ("Amy", "girl") in data
+
+    def test_add_lat_lon_columns(self):
+        database = db.session.query(Database).first()
+        database.allow_dml = True
+        db.session.commit()
+        meta = MetaData()
+        employees = Table(
+            "employees",
+            meta,
+            Column("employee_id", Integer, primary_key=True),
+            Column("employee_name", String(60), nullable=False, key="name"),
+        )
+        employees.create(db.engine)
+
+        table_name = employees.name
+        lat_column_name = "lat"
+        lon_column_name = "lon"
+
+        columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
+        number_of_columns_before = len(columns)
+
+        geocoding.Geocoder()._add_lat_lon_columns(
+            table_name, lat_column_name, lon_column_name
+        )
+
+        columns = reflection.Inspector.from_engine(db.engine).get_columns(table_name)
+        number_of_columns_after = len(columns)
+        assert number_of_columns_after == number_of_columns_before + 2
+        column_names = [column["name"] for column in columns]
+        assert lon_column_name in column_names
+        assert lat_column_name in column_names
 
     def test_insert_geocoded_data(self):
         table_name = "birth_names"
