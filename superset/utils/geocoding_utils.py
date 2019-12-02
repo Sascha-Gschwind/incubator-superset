@@ -16,6 +16,7 @@
 # under the License.
 import json
 import time
+from typing import List
 
 import requests
 from requests import HTTPError, RequestException, Timeout
@@ -37,7 +38,6 @@ class GeocoderUtil:  # pylint: disable=too-few-public-methods
         try:
             if geocoder == "MapTiler":
                 return self._geocode_maptiler(data)
-            return self._geocode_testing()
         except Exception as e:
             raise e
         finally:
@@ -51,7 +51,7 @@ class GeocoderUtil:  # pylint: disable=too-few-public-methods
         :return: a dictionary containing the addresses and their long,lat values
         """
         errors = []
-        geocoded_data = [()]
+        geocoded_data: List[tuple] = []
         data_length = len(data)
         counter = 0
         self.progress["success_counter"] = 0
@@ -68,8 +68,7 @@ class GeocoderUtil:  # pylint: disable=too-few-public-methods
                 address = " ".join(datum)
                 geocoded = self._get_coordinates_from_address(address)
                 if geocoded is not None:
-                    geocoded_data.append(datum + tuple(geocoded))
-
+                    geocoded_data.append(tuple(list(datum) + geocoded))
                     self.progress["success_counter"] += 1
                 counter += 1
                 self.progress["progress"] = counter / data_length
@@ -114,19 +113,19 @@ class GeocoderUtil:  # pylint: disable=too-few-public-methods
             return coordinates["center"] or None
         return None
 
-    # TODO remove it in mocking class
-    def _geocode_testing(self) -> dict:
-        counter = 0
-        datalen = 10
-        self.progress["is_in_progress"] = True
-        self.progress["progress"] = 0
-        for _ in range(datalen):
-            if self.interruptflag:
-                self.interruptflag = False
-                self.progress["is_in_progress"] = False
-                self.progress["progress"] = 0
-                return {0: ""}
-            time.sleep(2)
-            counter = counter + 1
-            self.progress["progress"] = counter / datalen
-        return {0: ""}
+
+class GeocoderUtilMock(GeocoderUtil):
+    def _get_coordinates_from_address(self, address):
+        geocoded_data = self.get_mocked_data()
+        time.sleep(2)
+        return geocoded_data.get(address)
+
+    def get_mocked_data(self):
+        geocoded_data = {
+            "Oberseestrasse 10 Rapperswil Switzerland": [47.224, 8.8181],
+            "Grossmünsterplatz Zürich Switzerland": [47.370, 8.544],
+            "Uetliberg Zürich Switzerland": [47.353, 8.492],
+            "Zürichbergstrasse 221 Zürich Switzerland": [47.387, 8.574],
+            "Bahnhofstrasse Zürich Switzerland": [47.372, 8.539],
+        }
+        return geocoded_data

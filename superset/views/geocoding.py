@@ -15,6 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 # pylint: disable=C,R,W
+from typing import List
 
 import simplejson as json
 from flask import request, Response
@@ -129,7 +130,7 @@ class Geocoder(BaseSupersetView):
         lon_column = request.json.get("longitudeColumnName", "lon")
         override_if_exist = request.json.get("overwriteIfExists", False)
         save_on_stop_geocoding = request.json.get("saveOnErrorOrInterrupt", True)
-        data = [()]
+        data: List[tuple] = []
 
         try:
             if not override_if_exist and self._does_column_name_exist(
@@ -154,7 +155,7 @@ class Geocoder(BaseSupersetView):
             return json_error_response(e.args[0], status=500)
 
         try:
-            data = self._geocode(data)
+            data = self.geocoder_util.geocode("MapTiler", data)
         except Exception as e:
             if not save_on_stop_geocoding:
                 return json_error_response(e.args[0])
@@ -204,19 +205,6 @@ class Geocoder(BaseSupersetView):
                 + selected_columns
             )
 
-    def _geocode(self, data: list, dev=True):
-        """
-        Internal method which starts the geocoding
-        :param data: the data to be geocoded as a list of tuples
-        :param dev: Whether to Mock the geocoding process for testing purposes
-        :return: a list of tuples containing the data and the corresponding long, lat values
-        """
-        # TODO replace mock-method with mock-geocoder
-        if dev:
-            return self.geocoder_util.geocode("", data)
-        else:
-            return self.geocoder_util.geocode("MapTiler", data)
-
     def _add_lat_lon_columns(self, table_name: str, lat_column: str, lon_column: str):
         """
         Add new longitude and latitude columns to table
@@ -228,8 +216,10 @@ class Geocoder(BaseSupersetView):
         connection = db.engine.connect()
         transaction = connection.begin()
         try:
-            self._add_column(connection, table_name, lat_column, Float())
-            self._add_column(connection, table_name, lon_column, Float())
+            if not self._does_column_name_exist(table_name, lat_column):
+                self._add_column(connection, table_name, lat_column, Float())
+            if not self._does_column_name_exist(table_name, lon_column):
+                self._add_column(connection, table_name, lon_column, Float())
             transaction.commit()
         except Exception:
             transaction.rollback()
