@@ -115,17 +115,14 @@ class GeocoderUtil:  # pylint: disable=too-few-public-methods
 
 
 class GeocoderUtilMock(GeocoderUtil):
-    def _get_coordinates_from_address(self, address):
-        geocoded_data = self.get_mocked_data()
-        time.sleep(2)
-        return geocoded_data.get(address)
+    geocoded_data = {
+        "Oberseestrasse 10 Rapperswil Switzerland": [47.224, 8.8181],
+        "Grossmünsterplatz Zürich Switzerland": [47.370, 8.544],
+        "Uetliberg Zürich Switzerland": [47.353, 8.492],
+        "Zürichbergstrasse 221 Zürich Switzerland": [47.387, 8.574],
+        "Bahnhofstrasse Zürich Switzerland": [47.372, 8.539],
+    }
 
-    def get_mocked_data(self):
-        geocoded_data = {
-            "Oberseestrasse 10 Rapperswil Switzerland": [47.224, 8.8181],
-            "Grossmünsterplatz Zürich Switzerland": [47.370, 8.544],
-            "Uetliberg Zürich Switzerland": [47.353, 8.492],
-            "Zürichbergstrasse 221 Zürich Switzerland": [47.387, 8.574],
-            "Bahnhofstrasse Zürich Switzerland": [47.372, 8.539],
-        }
-        return geocoded_data
+    def _get_coordinates_from_address(self, address):
+        time.sleep(2)
+        return self.geocoded_data.get(address)

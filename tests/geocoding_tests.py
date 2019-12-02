@@ -33,32 +33,36 @@ from .base_tests import SupersetTestCase
 
 
 class GeocodingTests(SupersetTestCase):
-
     def __init__(self, *args, **kwargs):
         super(GeocodingTests, self).__init__(*args, **kwargs)
 
     def setUp(self):
         self.login()
         Geocoder.geocoder_util = GeocoderUtilMock(conf)
+        self.database = db.session.query(Database).first()
+        self.database.allow_dml = True
+        self.first_table = (
+            db.session.query(SqlaTable).filter_by(database_id=self.database.id).first()
+        )
+        db.session.commit()
 
     def tearDown(self):
         self.logout()
-
-    def init_department_table(self):
-        database = db.session.query(Database).first()
-        database.allow_dml = True
+        self.database.allow_dml = False
         db.session.commit()
 
-        if not database.has_table_by_name("departments"):
+    def init_department_table(self):
+        self.departments_table_name = "departments"
+        if not self.database.has_table_by_name(self.departments_table_name):
             meta = MetaData()
             departments = Table(
-                "departments",
+                self.departments_table_name,
                 meta,
                 Column("department_id", Integer, primary_key=True),
                 Column("name", String(60), nullable=False, key="name"),
-                Column("street", Integer, nullable=False, key="street"),
-                Column("city", Integer, nullable=False, key="city"),
-                Column("country", Integer, nullable=False, key="country"),
+                Column("street", String(60), nullable=False, key="street"),
+                Column("city", String(60), nullable=False, key="city"),
+                Column("country", String(60), nullable=False, key="country"),
             )
             departments.create(db.engine)
 
@@ -108,22 +112,13 @@ class GeocodingTests(SupersetTestCase):
         dashboard_page = self.get_resp(url)
         assert "Geocode Addresses" in dashboard_page
 
-    def test_geocode_adresses_view_load(self):
+    def test_geocode_addresses_view_load(self):
         url = "/geocoder/geocoding"
         form_get = self.get_resp(url)
         assert "Geocode Addresses" in form_get
 
     def test_get_editable_tables(self):
-        database = db.session.query(Database).first()
-        database.allow_dml = True
-        db.session.commit()
-
-        table_name = (
-            db.session.query(SqlaTable)
-            .filter_by(database_id=database.id)
-            .first()
-            .table_name
-        )
+        table_name = self.first_table.table_name
 
         table_names = [table.name for table in Geocoder()._get_editable_tables()]
         assert table_name in table_names
@@ -131,12 +126,14 @@ class GeocodingTests(SupersetTestCase):
     def test_get_columns(self):
         url = "/geocoder/geocoding/columns"
 
-        table = db.session.query(SqlaTable).first()
         tableDto = models.TableDto(
-            table.id, table.table_name, table.schema, table.database_id
+            self.first_table.id,
+            self.first_table.table_name,
+            self.first_table.schema,
+            self.first_table.database_id,
         )
         columns = reflection.Inspector.from_engine(db.engine).get_columns(
-            table.table_name
+            self.first_table.table_name
         )
 
         data = {"table": tableDto.to_json()}
@@ -155,7 +152,7 @@ class GeocodingTests(SupersetTestCase):
 
     def test_does_valid_column_name_exist(self):
         self.init_department_table()
-        table_name = "departments"
+        table_name = self.departments_table_name
         column_name = (
             reflection.Inspector.from_engine(db.engine)
             .get_columns(table_name)[0]
@@ -167,7 +164,7 @@ class GeocodingTests(SupersetTestCase):
 
     def test_does_invalid_column_name_exist(self):
         self.init_department_table()
-        table_name = "departments"
+        table_name = self.departments_table_name
         column_name = "no_column"
 
         response = Geocoder()._does_column_name_exist(table_name, column_name)
@@ -192,7 +189,7 @@ class GeocodingTests(SupersetTestCase):
     def test_add_lat_lon_columns(self):
         self.init_department_table()
 
-        table_name = "departments"
+        table_name = self.departments_table_name
         lat_column_name = "latitude"
         lon_column_name = "longitude"
 
@@ -232,7 +229,7 @@ class GeocodingTests(SupersetTestCase):
 
     def _geocode_post(self):
         return {
-            "datasource": "departments",
+            "datasource": self.departments_table_name,
             "streetColumn": "street",
             "cityColumn": "city",
             "countryColumn": "country",
@@ -243,7 +240,7 @@ class GeocodingTests(SupersetTestCase):
         }
 
     def test_geocode(self):
-        expected_coordinates = GeocoderUtilMock(conf).get_mocked_data().values()
+        expected_coordinates = GeocoderUtilMock(conf).geocoded_data.values()
         url = "/geocoder/geocoding/geocode"
 
         self.init_department_table()
@@ -275,7 +272,7 @@ class GeocodingTests(SupersetTestCase):
 
         progress = json.loads(self.get_resp(progress_url))
         assert 0 < progress.get("progress")
-        assert True == progress.get("is_in_progress")
+        assert progress.get("is_in_progress")
         assert 0 < progress.get("success_counter")
 
         geocode.join()
@@ -298,10 +295,11 @@ class GeocodingTests(SupersetTestCase):
         interrupt = self.get_resp(interrupt_url, json_=json.dumps("{}"))
         assert "" == interrupt
 
-        time.sleep(1)  # Wait to be sure geocode has geocoded another data
+        time.sleep(4)  # Wait to be sure geocode has geocoded another data
 
         progress = json.loads(self.get_resp(progress_url))
-        #assert 0 == progress.get("progress")
-        #assert False == progress.get("is_in_progress")
+        assert 5 > progress.get("success_counter")
+        assert 0 == progress.get("progress")
+        assert not progress.get("is_in_progress")
 
         geocode.join()
