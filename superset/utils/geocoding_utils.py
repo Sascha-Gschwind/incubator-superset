@@ -115,7 +115,7 @@ class GeocoderUtil:  # pylint: disable=too-few-public-methods
         return None
 
 
-class GeocoderUtilMock(GeocoderUtil): # pylint: disable=too-few-public-methods
+class GeocoderUtilMock(GeocoderUtil):  # pylint: disable=too-few-public-methods
     geocoded_data = {
         "Oberseestrasse 10 Rapperswil Switzerland": [47.224, 8.8181],
         "Grossmünsterplatz Zürich Switzerland": [47.370, 8.544],
