@@ -139,16 +139,14 @@ class Geocoder(BaseSupersetView):
                 raise ValueError(
                     "Column name {0} for latitude is already in use".format(lat_column)
                 )
-            print("after check existing 1")
             if not override_if_exist and self._does_column_name_exist(
                 table_name, lon_column
             ):
                 raise ValueError(
                     "Column name {0} for longitude is already in use".format(lon_column)
                 )
-            print("after check existing 2")
+
             data = self._load_data_from_columns(table_name, columns)
-            print("after load")
         except ValueError as e:
             return json_error_response(e.args[0], status=400)
         except SqlSelectException as e:
@@ -157,22 +155,16 @@ class Geocoder(BaseSupersetView):
             return json_error_response(e.args[0], status=500)
 
         try:
-            print("before geocode")
             data = self.geocoder_util.geocode("MapTiler", data)
-            print("after geocode")
         except Exception as e:
             if not save_on_stop_geocoding:
                 return json_error_response(e.args[0])
-            print("exception in geocode")
 
         try:
-            print("before add")
             self._add_lat_lon_columns(table_name, lat_column, lon_column)
-            print("after add")
             self._insert_geocoded_data(
                 table_name, lat_column, lon_column, columns, data
             )
-            print("after insert")
         except SqlAddColumnException as e:
             return json_error_response(e.args[0], status=500)
         except SqlUpdateException as e:
@@ -180,7 +172,6 @@ class Geocoder(BaseSupersetView):
         except Exception as e:
             return json_error_response(e.args[0], status=500)
 
-        print("after all")
         return json_success(json.dumps(data))
 
     def _does_column_name_exist(self, table_name: str, column_name: str):
@@ -274,12 +265,16 @@ class Geocoder(BaseSupersetView):
         :raise SqlUpdateException: When Update of given columns with given data went wrong
         """
         where_clause = "='%s' AND ".join(filter(None, geo_columns)) + "='%s'"
+        print(where_clause)
         number_of_columns = len(geo_columns)
-
+        print(number_of_columns)
         connection = db.engine.connect()
+        print("connection")
         transaction = connection.begin()
+        print("transaction")
         try:
             for row in data:
+                print("row")
                 update = "UPDATE %s SET %s=%s, %s=%s " % (
                     table_name,
                     lat_column,
@@ -287,11 +282,17 @@ class Geocoder(BaseSupersetView):
                     lon_column,
                     row[number_of_columns + 1],
                 )
+                print(update)
                 where = "WHERE " + where_clause % (row[:number_of_columns])
+                print(where)
                 connection.execute(text(update + where))
+                print(update+where)
             transaction.commit()
-        except Exception:
+            print("commit")
+        except Exception as e:
+            print("rollback")
             transaction.rollback()
+            print(e)
             raise SqlUpdateException(
                 "An error occured while inserting geocoded addresses"
             )

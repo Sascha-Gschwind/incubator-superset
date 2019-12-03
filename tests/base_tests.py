@@ -123,12 +123,11 @@ class SupersetTestCase(unittest.TestCase):
         if data:
             resp = self.client.post(url, data=data, follow_redirects=follow_redirects)
         elif json_:
-            print("in base")
             resp = self.client.post(url, json=json_, follow_redirects=follow_redirects)
         else:
             resp = self.client.get(url, follow_redirects=follow_redirects)
         if raise_on_error and resp.status_code > 400:
-            print("resp:" + resp.data)
+            print(resp.data.decode("utf-8"))
             raise Exception("http request failed with code {}".format(resp.status_code))
         return resp.data.decode("utf-8")
 
