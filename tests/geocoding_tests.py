@@ -245,7 +245,9 @@ class GeocodingTests(SupersetTestCase):
 
         self.init_department_table()
 
+        print("before post")
         geocoded_data = self.get_resp(url, json_=self._geocode_post())
+        print("after post")
 
         for coordinates in expected_coordinates:
             assert str(coordinates[0]) in geocoded_data
