@@ -265,16 +265,12 @@ class Geocoder(BaseSupersetView):
         :raise SqlUpdateException: When Update of given columns with given data went wrong
         """
         where_clause = "='%s' AND ".join(filter(None, geo_columns)) + "='%s'"
-        print(where_clause)
         number_of_columns = len(geo_columns)
-        print(number_of_columns)
+
         connection = db.engine.connect()
-        print("connection")
         transaction = connection.begin()
-        print("transaction")
         try:
             for row in data:
-                print("row")
                 update = "UPDATE %s SET %s=%s, %s=%s " % (
                     table_name,
                     lat_column,
@@ -282,17 +278,11 @@ class Geocoder(BaseSupersetView):
                     lon_column,
                     row[number_of_columns + 1],
                 )
-                print(update)
                 where = "WHERE " + where_clause % (row[:number_of_columns])
-                print(where)
                 connection.execute(text(update + where))
-                print(update+where)
             transaction.commit()
-            print("commit")
-        except Exception as e:
-            print("rollback")
+        except Exception:
             transaction.rollback()
-            print(e)
             raise SqlUpdateException(
                 "An error occured while inserting geocoded addresses"
             )
