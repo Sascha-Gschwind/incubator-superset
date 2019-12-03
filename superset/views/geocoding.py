@@ -120,7 +120,6 @@ class Geocoder(BaseSupersetView):
         Geocode addresses in given columns from given table
         :return: geocoded data as list of tuples or an error message if somethings went wrong
         """
-        print("in geocode")
         table_name = request.json.get("datasource", "")
         columns = [
             request.json.get("streetColumn"),
@@ -132,7 +131,6 @@ class Geocoder(BaseSupersetView):
         override_if_exist = request.json.get("overwriteIfExists", False)
         save_on_stop_geocoding = request.json.get("saveOnErrorOrInterrupt", True)
         data: List[tuple] = []
-        print("after get input")
 
         try:
             if not override_if_exist and self._does_column_name_exist(
@@ -141,14 +139,16 @@ class Geocoder(BaseSupersetView):
                 raise ValueError(
                     "Column name {0} for latitude is already in use".format(lat_column)
                 )
+            print("after check existing 1")
             if not override_if_exist and self._does_column_name_exist(
                 table_name, lon_column
             ):
                 raise ValueError(
                     "Column name {0} for longitude is already in use".format(lon_column)
                 )
-
+            print("after check existing 2")
             data = self._load_data_from_columns(table_name, columns)
+            print("after load")
         except ValueError as e:
             return json_error_response(e.args[0], status=400)
         except SqlSelectException as e:
@@ -157,16 +157,22 @@ class Geocoder(BaseSupersetView):
             return json_error_response(e.args[0], status=500)
 
         try:
+            print("before geocode")
             data = self.geocoder_util.geocode("MapTiler", data)
+            print("after geocode")
         except Exception as e:
             if not save_on_stop_geocoding:
                 return json_error_response(e.args[0])
+            print("exception in geocode")
 
         try:
+            print("before add")
             self._add_lat_lon_columns(table_name, lat_column, lon_column)
+            print("after add")
             self._insert_geocoded_data(
                 table_name, lat_column, lon_column, columns, data
             )
+            print("after insert")
         except SqlAddColumnException as e:
             return json_error_response(e.args[0], status=500)
         except SqlUpdateException as e:
@@ -174,6 +180,7 @@ class Geocoder(BaseSupersetView):
         except Exception as e:
             return json_error_response(e.args[0], status=500)
 
+        print("after all")
         return json_success(json.dumps(data))
 
     def _does_column_name_exist(self, table_name: str, column_name: str):

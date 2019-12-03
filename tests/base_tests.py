@@ -128,7 +128,7 @@ class SupersetTestCase(unittest.TestCase):
         else:
             resp = self.client.get(url, follow_redirects=follow_redirects)
         if raise_on_error and resp.status_code > 400:
-            print("resp:" + resp)
+            print("resp:" + resp.data)
             raise Exception("http request failed with code {}".format(resp.status_code))
         return resp.data.decode("utf-8")
 
