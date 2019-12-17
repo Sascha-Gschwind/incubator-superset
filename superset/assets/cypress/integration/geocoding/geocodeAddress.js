@@ -23,21 +23,21 @@ export default () => {
     // after
 
     describe('geocode data from a table', () => {
-         before(function() {
-              cy.login()
+         before (function() {
+              cy.login();
             cy.server();
          cy.visit('/databaseview/edit/10');
         cy.get('allow_dml').check(true);
         cy.get('button').contains('Save').click();
-    })
+    });
         beforeEach(() => {
-            cy.login()
+            cy.login();
             cy.server();
-            cy.visit('/superset/geocoding')
+            cy.visit('/superset/geocoding');
             cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
 
-        it('test geocoding of simple data'), () => {
+        it('test geocoding of simple data', () => {
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
             });
@@ -50,12 +50,12 @@ export default () => {
             });
              cy.get('button').contains('Geocode').click();
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
-        }
-        after(function() {
+        });
+        after (function() {
         cy.visit('/databaseview/edit/10');
         cy.get('allow_dml').check(false);
         cy.get('button').contains('Save').click();
       cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
-    })
-    })
-}
+    });
+    });
+};

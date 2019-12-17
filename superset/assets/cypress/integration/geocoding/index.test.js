@@ -17,6 +17,6 @@
  */
 import geocodeAddressTest from './geocodeAddress';
 
-describe(' All geocoding tests'), () => {
+describe(' All geocoding tests', () => {
     geocodeAddressTest();
-}
+});
