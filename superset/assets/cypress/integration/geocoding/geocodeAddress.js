@@ -48,7 +48,7 @@ export default () => {
         });
 
         it('test geocoding of simple data', () => {
-            cy.url({timeout:3000}).should('include', 'geocoding/geocode');
+            cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
             });
