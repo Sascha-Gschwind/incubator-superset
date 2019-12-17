@@ -36,7 +36,12 @@ from superset.exceptions import (
     SqlUpdateException,
     TableNotFoundException,
 )
-from superset.utils.geocoders import BaseGeocoder, GoogleGeocoder, MapTilerGeocoder
+from superset.utils.geocoders import (
+    BaseGeocoder,
+    GeocoderMock,
+    GoogleGeocoder,
+    MapTilerGeocoder,
+)
 
 from .base import api, BaseSupersetView, json_error_response, json_success
 
@@ -365,7 +370,7 @@ class Geocoder(BaseSupersetView):
             if geocoder_name.lower() == "google":
                 self.geocoder = GoogleGeocoder(conf)
             if geocoder_name.lower() == "testing_geocoder":
-                self.geocoder = Geoco
+                self.geocoder = GeocoderMock(conf)
 
     def _geocode(self, data: list, geocoder):
         """
