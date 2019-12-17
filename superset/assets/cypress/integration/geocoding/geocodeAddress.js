@@ -46,7 +46,7 @@ export default () => {
             });
 
             cy.get('geocoder').then((elem) => {
-                elem.val('testing');
+                elem.val('testing_geocoder');
             });
              cy.get('button').contains('Geocode').click();
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');

@@ -18,6 +18,7 @@
 
 import json
 import logging
+import time
 
 from flask import flash
 from requests import get, HTTPError, RequestException, Timeout
@@ -212,3 +213,20 @@ class GoogleGeocoder(BaseGeocoder):
     def check_api_key(self):
         if not self.conf["GOOGLE_API_KEY"]:
             raise NoAPIKeySuppliedException("No API Key for Google was supplied")
+
+
+class GeocoderMock(BaseGeocoder):
+    geocoded_data = {
+        "Oberseestrasse 10 Rapperswil Switzerland": [47.224, 8.8181],
+        "Grossmünsterplatz Zürich Switzerland": [47.370, 8.544],
+        "Uetliberg Zürich Switzerland": [47.353, 8.492],
+        "Zürichbergstrasse 221 Zürich Switzerland": [47.387, 8.574],
+        "Bahnhofstrasse Zürich Switzerland": [47.372, 8.539],
+    }
+
+    def _get_coordinates_from_address(self, address: str):
+        time.sleep(2)
+        return [self.geocoded_data.get(address), 0.81]
+
+    def check_api_key(self):
+        pass

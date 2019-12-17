@@ -364,6 +364,8 @@ class Geocoder(BaseSupersetView):
                 self.geocoder = MapTilerGeocoder(conf)
             if geocoder_name.lower() == "google":
                 self.geocoder = GoogleGeocoder(conf)
+            if geocoder_name.lower() == "testing_geocoder":
+                self.geocoder = Geoco
 
     def _geocode(self, data: list, geocoder):
         """
