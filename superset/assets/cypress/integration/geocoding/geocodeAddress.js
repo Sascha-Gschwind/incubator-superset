@@ -53,6 +53,7 @@ export default () => {
                 elem.val('wb_health_population');
             });
             cy.wait(500);
+            // problem here probably since it's disabled until we select a datasource
             cy.get('#countryColumn').then((elem) => {
                 elem.val('country_name');
             });
