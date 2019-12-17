@@ -18,15 +18,18 @@
 
 export default () => {
     // before
-    it('set DML'), () => {
-        cy.visit('/databaseview/edit/10');
-        cy.get('allow_dml').check(true);
-        cy.get('button').contains('Save').click();
-      cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
-    }
+
+
     // after
 
     describe('geocode data from a table', () => {
+         before(function() {
+              cy.login()
+            cy.server();
+         cy.visit('/databaseview/edit/10');
+        cy.get('allow_dml').check(true);
+        cy.get('button').contains('Save').click();
+    })
         beforeEach(() => {
             cy.login()
             cy.server();
@@ -48,11 +51,11 @@ export default () => {
              cy.get('button').contains('Geocode').click();
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
         }
-        it('unset DML'), () => {
+        after(function() {
         cy.visit('/databaseview/edit/10');
         cy.get('allow_dml').check(false);
         cy.get('button').contains('Save').click();
       cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
-    }
+    })
     })
 }
