@@ -37,22 +37,23 @@ export default () => {
          cy.visit('/databaseview/edit/1');
          cy.url({ timeout: 3000 }).should('include', '/databaseview/edit/');
          cy.get('#force_ctas_schema');
-        cy.get('#allow_dml').then((elem) => {
+            cy.get('#allow_dml').then((elem) => {
             elem.val(true);
-        });
+            });
 
-        cy.get('button').contains('Save').click();
-        //cy.url({ timeout: 3000 }).should('include', '/databaseview/list');
-        cy.visit('/geocoder/geocoding')
-        //    cy.route('/tabelmodelview/list').as('finish_geocoding');
+            cy.get('button').contains('Save').click();
+            //cy.url({ timeout: 3000 }).should('include', '/databaseview/list');
+            cy.visit('/geocoder/geocoding')
+            //    cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
 
         it('test geocoding of simple data', () => {
+            cy.url({timeout:3000}).should('include', 'geocoding/geocode');
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
             });
             cy.get('#countryColumn').then((elem) => {
-                elem.val('2');
+                elem.val('country_name');
             });
 
             cy.get('#geocoder').then((elem) => {
