@@ -31,12 +31,12 @@ export default () => {
 
         cy.get('button').contains('Save').click();
     });
-        beforeEach(() => {
+        /*beforeEach(() => {
             cy.login();
             cy.server();
             cy.visit('/superset/geocoding');
             cy.route('/tabelmodelview/list').as('finish_geocoding');
-        });
+        });*/
 
         it('test geocoding of simple data', () => {
             cy.get('#datasource').then((elem) => {
@@ -56,7 +56,6 @@ export default () => {
         cy.visit('/databaseview/edit/1');
         cy.get('#allow_dml').check(false);
         cy.get('button').contains('Save').click();
-      cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
     });
     });
 };
