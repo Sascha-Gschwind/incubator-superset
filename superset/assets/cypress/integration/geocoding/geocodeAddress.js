@@ -40,8 +40,8 @@ export default () => {
             elem.val(true);
         });
 
-        //cy.get('button').contains('Save').click();
-        cy.visit('/superset/geocoding')
+        cy.get('button').contains('Save').click();
+        cy.visit('/geocoder/geocoding')
         //    cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
 
