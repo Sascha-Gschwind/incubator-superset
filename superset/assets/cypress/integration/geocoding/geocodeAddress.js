@@ -37,7 +37,7 @@ export default () => {
          cy.visit('/databaseview/edit/1');
         cy.get('#allow_dml').check(true);
 
-        cy.get('button').contains('Save').click();
+        //cy.get('button').contains('Save').click();
         cy.visit('/superset/geocoding')
         //    cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
