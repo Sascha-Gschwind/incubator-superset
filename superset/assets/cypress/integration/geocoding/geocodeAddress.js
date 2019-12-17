@@ -42,7 +42,7 @@ export default () => {
         });
 
         cy.get('button').contains('Save').click();
-        cy.url({ timeout: 3000 }).should('include', '/databaseview/list');
+        //cy.url({ timeout: 3000 }).should('include', '/databaseview/list');
         cy.visit('/geocoder/geocoding')
         //    cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
