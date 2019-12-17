@@ -35,7 +35,10 @@ export default () => {
              cy.login();
             cy.server();
          cy.visit('/databaseview/edit/1');
-        cy.get('#allow_dml').check(true);
+         cy.get('force_ctas_schema');
+        cy.get('#allow_dml').then((elem) => {
+            elem.val(true);
+        });
 
         //cy.get('button').contains('Save').click();
         cy.visit('/superset/geocoding')
@@ -58,7 +61,7 @@ export default () => {
         });
         after (function() {
         cy.visit('/databaseview/edit/1');
-        cy.get('#allow_dml').check(false);
+        cy.get('#allow_dml').uncheck();
         cy.get('button').contains('Save').click();
     });
     });
