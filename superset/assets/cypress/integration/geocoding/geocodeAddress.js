@@ -50,7 +50,7 @@ export default () => {
                 elem.val('country_name');
             });
 
-            cy.get('geocoder').then((elem) => {
+            cy.get('#geocoder').then((elem) => {
                 elem.val('testing_geocoder');
             });
              cy.get('button').contains('Geocode').click();
