@@ -52,6 +52,7 @@ export default () => {
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
             });
+            cy.wait(500);
             cy.get('#countryColumn').then((elem) => {
                 elem.val('country_name');
             });
