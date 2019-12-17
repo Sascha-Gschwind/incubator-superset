@@ -23,20 +23,24 @@ export default () => {
     // after
 
     describe('geocode data from a table', () => {
-         before (function() {
+      /*   before (function() {
               cy.login();
             cy.server();
          cy.visit('/databaseview/edit/1');
         cy.get('#allow_dml').check(true);
 
         cy.get('button').contains('Save').click();
-    });
-        /*beforeEach(() => {
-            cy.login();
+    }); */
+        beforeEach(() => {
+             cy.login();
             cy.server();
-            cy.visit('/superset/geocoding');
-            cy.route('/tabelmodelview/list').as('finish_geocoding');
-        });*/
+         cy.visit('/databaseview/edit/1');
+        cy.get('#allow_dml').check(true);
+
+        cy.get('button').contains('Save').click();
+        cy.visit('/superset/geocoding')
+        //    cy.route('/tabelmodelview/list').as('finish_geocoding');
+        });
 
         it('test geocoding of simple data', () => {
             cy.get('#datasource').then((elem) => {
