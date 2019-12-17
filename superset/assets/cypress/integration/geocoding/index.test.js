@@ -15,44 +15,8 @@
 * specific language governing permissions and limitations
 * under the License.
  */
+import geocodeAddress from './geocodeAddress';
 
-export default () => {
-    // before
-    it('set DML'), () => {
-        cy.visit('/databaseview/edit/10');
-        cy.get('allow_dml').check(true);
-        cy.get('button').contains('Save').click();
-      cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
-    }
-    // after
-
-    describe('geocode data from a table', () => {
-        beforeEach(() => {
-            cy.login()
-            cy.server();
-            cy.visit('/superset/geocoding')
-            cy.route('/tabelmodelview/list').as('finish_geocoding');
-        });
-
-        it('test geocoding of simple data'), () => {
-            cy.get('#datasource').then((elem) => {
-                elem.val('wb_health_population');
-            });
-            cy.get('#countryColumn').then((elem) => {
-                elem.val('country_name');
-            });
-
-            cy.get('geocoder').then((elem) => {
-                elem.val('testing');
-            });
-             cy.get('button').contains('Geocode').click();
-            cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
-        }
-        it('unset DML'), () => {
-        cy.visit('/databaseview/edit/10');
-        cy.get('allow_dml').check(false);
-        cy.get('button').contains('Save').click();
-      cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
-    }
-    })
+describe(' All geocoding tests'), () => {
+    geocodeAddress();
 }
