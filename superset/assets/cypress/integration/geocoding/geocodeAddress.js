@@ -35,13 +35,14 @@ export default () => {
              cy.login();
             cy.server();
          cy.visit('/databaseview/edit/1');
+         cy.url({ timeout: 3000 }).should('include', '/databaseview/edit/');
          cy.get('#force_ctas_schema');
         cy.get('#allow_dml').then((elem) => {
             elem.val(true);
         });
 
         cy.get('button').contains('Save').click();
-        cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
+        cy.url({ timeout: 3000 }).should('include', '/databaseview/list');
         cy.visit('/geocoder/geocoding')
         //    cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
