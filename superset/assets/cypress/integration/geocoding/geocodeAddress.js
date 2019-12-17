@@ -27,7 +27,7 @@ export default () => {
               cy.login();
             cy.server();
          cy.visit('/databaseview/edit/1');
-        cy.get('allow_dml').check(true);
+        cy.get('#allow_dml').check(true);
         cy.get('button').contains('Save').click();
     });
         beforeEach(() => {
@@ -52,7 +52,7 @@ export default () => {
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
         });
         after (function() {
-        cy.visit('/databaseview/edit/10');
+        cy.visit('/databaseview/edit/1');
         cy.get('allow_dml').check(false);
         cy.get('button').contains('Save').click();
       cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
