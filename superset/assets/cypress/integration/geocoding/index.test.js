@@ -15,8 +15,8 @@
 * specific language governing permissions and limitations
 * under the License.
  */
-import geocodeAddress from './geocodeAddress';
+import geocodeAddressTest from './geocodeAddress';
 
 describe(' All geocoding tests'), () => {
-    geocodeAddress();
+    geocodeAddressTest();
 }
