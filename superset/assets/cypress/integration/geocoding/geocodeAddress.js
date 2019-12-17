@@ -35,7 +35,7 @@ export default () => {
              cy.login();
             cy.server();
          cy.visit('/databaseview/edit/1');
-         cy.get('force_ctas_schema');
+         cy.get('#force_ctas_schema');
         cy.get('#allow_dml').then((elem) => {
             elem.val(true);
         });
