@@ -41,6 +41,7 @@ export default () => {
         });
 
         cy.get('button').contains('Save').click();
+        cy.url({ timeout: 30000 }).should('include', '/databaseview/list');
         cy.visit('/geocoder/geocoding')
         //    cy.route('/tabelmodelview/list').as('finish_geocoding');
         });
@@ -50,7 +51,7 @@ export default () => {
                 elem.val('wb_health_population');
             });
             cy.get('#countryColumn').then((elem) => {
-                elem.val('country_name');
+                elem.val('2');
             });
 
             cy.get('#geocoder').then((elem) => {
