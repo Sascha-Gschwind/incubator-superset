@@ -26,7 +26,7 @@ export default () => {
          before (function() {
               cy.login();
             cy.server();
-         cy.visit('/databaseview/edit/10');
+         cy.visit('/databaseview/edit/1');
         cy.get('allow_dml').check(true);
         cy.get('button').contains('Save').click();
     });
