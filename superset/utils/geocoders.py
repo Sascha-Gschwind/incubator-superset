@@ -71,7 +71,7 @@ class BaseGeocoder(object):
 
     def _set_initial_states(self, in_progress=False) -> None:
         """
-        Sets the initial state of the progress
+        Sets the initial state of the progress dictionary
         :param in_progress: If the geocoding is in progress
         """
         self.interruptflag = False
@@ -83,7 +83,7 @@ class BaseGeocoder(object):
 
     def _set_result_precision_counters(self) -> dict:
         """
-        Sets the success, doubt and faled counters
+        Sets the success, doubt and failed counters
         :return: The dict containing the counters
         """
         success_dict = {
@@ -160,7 +160,7 @@ class BaseGeocoder(object):
         self.progress["progress"] = 100
         return ["", [geocoded_data, self._set_result_precision_counters()]]
 
-    def _get_coordinates_from_address(self, address: str):
+    def _get_coordinates_from_address(self, address: str) -> list:
         """
         Gets the coordinates from an address using the geocoding api
         :param address: The address to geocode
@@ -168,7 +168,7 @@ class BaseGeocoder(object):
         """
         raise NotImplementedError
 
-    def check_api_key(self):
+    def check_api_key(self) -> None:
         """
         Checks the api key from the config
         :raise NotImplementedError: If the method is not implemented
