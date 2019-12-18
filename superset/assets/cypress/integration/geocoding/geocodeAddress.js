@@ -49,14 +49,15 @@ export default () => {
 
         it('test geocoding of simple data', () => {
             cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
-            cy.contains("No datasource that allows DML").should('not.exist');
-            cy.contains("No datasource that allows DML").should('exist');
+            cy.get('#alert-danger').should('not.exist');
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
             });
             cy.get('#datasource').then((elem) => {
                 elem.val('10');
             });
+            cy.get('button').contains('Geocode').click();
+            cy.contains("At least one column needs");
             cy.wait(500);
             // problem here probably since it's disabled until we select a datasource
             cy.get('#countryColumn').then((elem) => {
