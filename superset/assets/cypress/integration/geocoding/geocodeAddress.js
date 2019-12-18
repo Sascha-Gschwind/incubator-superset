@@ -50,7 +50,6 @@ export default () => {
         it('test geocoding of simple data', () => {
             cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
             cy.contains("No datasource that allows DML").should('not.exist');
-            cy.get("#alert-danger");
             cy.contains("No datasource that allows DML").should('exist');
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
