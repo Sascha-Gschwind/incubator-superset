@@ -49,6 +49,7 @@ export default () => {
 
         it('test geocoding of simple data', () => {
             cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
+            cy.url({timeout:3000}).should('not.include', 'databaseview');
             cy.contains('Geocode');
             cy.get('#alert-danger').should('not.exist');
             cy.get('button').contains('Geocode').click();
