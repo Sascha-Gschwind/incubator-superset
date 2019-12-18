@@ -57,15 +57,18 @@ export default () => {
             });
             cy.get('button').contains('Geocode').click();
             cy.contains("At least one column needs");
+            cy.log ("contained at least one column needed");
             cy.wait(500);
             // problem here probably since it's disabled until we select a datasource
             cy.get('#countryColumn').then((elem) => {
                 elem.val('country_name');
             });
+            cy.log("found countryColumn");
 
             cy.get('#geocoder').then((elem) => {
                 elem.val('testing_geocoder');
             });
+            cy.log("set geocoder");
              cy.get('button').contains('Geocode').click();
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
         });
@@ -74,16 +77,37 @@ export default () => {
              cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
             cy.get('#alert-danger').should('not.exist');
              cy.get('#datasource').then((elem) => {
-                elem.val('0');
+                 elem.val('0');
+             });
                  cy.get('#countryColumn').then((elem) => {
-                elem.val('country_name');
+                     elem.val('country_name');
+                 });
                  cy.get('button').contains('Geocode').click();
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
             });
 
 
-            });
-        })
+        it ("test3", () => {
+            cy.get('#datasource').then((elem) => {
+                        elem.val('0');
+                    });
+                    cy.get('button').contains('Geocode').click();
+                    cy.contains("At least one column needs");
+                    cy.log ("contained at least one column needed");
+                    cy.wait(500);
+                    // problem here probably since it's disabled until we select a datasource
+                    cy.get('#countryColumn').then((elem) => {
+                        elem.val('country_name');
+                    });
+                    cy.log("found countryColumn");
+
+                    cy.get('#geocoder').then((elem) => {
+                        elem.val('0');
+                    });
+                    cy.log("set geocoder");
+                     cy.get('button').contains('Geocode').click();
+                    cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
+        });
         after (function() {
         cy.visit('/databaseview/edit/1');
         cy.get('#allow_dml').uncheck();
