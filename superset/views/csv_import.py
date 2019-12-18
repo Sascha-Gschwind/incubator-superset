@@ -32,7 +32,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from werkzeug.utils import secure_filename
 
-from superset import app, appbuilder, conf, db, security_manager
+from superset import app, appbuilder, db, security_manager
 from superset.connectors.sqla.models import SqlaTable
 from superset.exceptions import (
     DatabaseAlreadyExistException,
@@ -298,20 +298,20 @@ class CsvImporter(BaseSupersetView):
         :param database: the database object to configure
         :return PostgreSQL url
         """
-        postgresql_user = conf["POSTGRESQL_USERNAME"]
+        postgresql_user = app.config["POSTGRESQL_USERNAME"]
         if not postgresql_user:
             raise NoUsernameSuppliedException(
                 "No username supplied for PostgreSQL", None
             )
-        postgresql_password = conf["POSTGRESQL_PASSWORD"]
+        postgresql_password = app.config["POSTGRESQL_PASSWORD"]
         if not postgresql_password:
             raise NoPasswordSuppliedException(
                 "No password supplied for PostgreSQL", None
             )
-        postgresql_host = conf["POSTGRESQL_HOST"]
+        postgresql_host = app.config["POSTGRESQL_HOST"]
         if not postgresql_host:
             raise NoHostNameSuppliedException("No host supplied for PostgreSQL", None)
-        postgresql_port = conf["POSTGRESQL_PORT"]
+        postgresql_port = app.config["POSTGRESQL_PORT"]
 
         if postgresql_port:
             postgresql_server = postgresql_host + ":" + postgresql_port
