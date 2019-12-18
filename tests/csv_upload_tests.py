@@ -35,7 +35,7 @@ from superset.exceptions import (
     NoUsernameSuppliedException,
     SchemaNotAllowedCsvUploadException,
     TableCreationException,
-)
+    IdConvertException)
 from superset.utils import core as utils
 from superset.views.csv_import import CsvImporter
 from tests.test_app import app
@@ -215,7 +215,7 @@ class CsvUploadTests(SupersetTestCase):
         error_message = (
             "Possible tampering detected, non-numeral character in database-id"
         )
-        with self.assertRaisesRegex(DatabaseFileAlreadyExistsException, error_message):
+        with self.assertRaisesRegex(IdConvertException, error_message):
             self.importer._convert_database_id(database_id)
 
     def test_check_table_name(self):
