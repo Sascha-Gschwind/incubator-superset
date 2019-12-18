@@ -209,6 +209,7 @@ export class GeocodingForm extends React.Component {
                           options={this.getDatasources()}
                           onChange={this.setDatasource}
                           value={this.state.datasource}
+                          helpText={t('The datasource you want to enrich with geocoded values (Allow DML must be true).')}
                         />
                       </td>
                     </tr>
