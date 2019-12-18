@@ -31,6 +31,7 @@ from flask_babel import gettext as __, lazy_gettext as _
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from werkzeug.utils import secure_filename
+from wtforms_json import MultiDict
 
 from superset import app, appbuilder, db, security_manager
 from superset.connectors.sqla.models import SqlaTable
@@ -38,9 +39,9 @@ from superset.exceptions import (
     DatabaseAlreadyExistException,
     DatabaseCreationException,
     DatabaseDeletionException,
-    DatabaseFileAlreadyExistsException,
     FileSaveException,
     GetDatabaseException,
+    IdConvertException,
     NameNotAllowedException,
     NoHostNameSuppliedException,
     NoPasswordSuppliedException,
@@ -162,7 +163,7 @@ class CsvImporter(BaseSupersetView):
             self._create_table_in_superset(table_name, database, schema)
         except (
             NameNotAllowedException,
-            DatabaseFileAlreadyExistsException,
+            IdConvertException,
             DatabaseAlreadyExistException,
             SchemaNotAllowedCsvUploadException,
             NoResultFound,
@@ -218,7 +219,7 @@ class CsvImporter(BaseSupersetView):
     def _convert_database_id(self, database_id) -> int:
         """ Convert database id from string to int
         :param database_id: The database id to convert
-        :return: database id as integer
+        :return: database id as integer or IdConvertException
         """
         try:
             return int(database_id)
@@ -226,13 +227,13 @@ class CsvImporter(BaseSupersetView):
             message = _(
                 "Possible tampering detected, non-numeral character in database-id"
             )
-            raise DatabaseFileAlreadyExistsException(message, e)
+            raise IdConvertException(message, e)
 
     def _check_table_name(self, table_name: str, fail_if_table_exists: bool) -> None:
-        """ Check if table name is alredy in use
+        """ Check if table name is already in use
         :param table_name: the name of the table to check
         :param fail_if_table_exists: only check table name if table exists has 'Fail' as value
-        :return: TableNameInUseException if table name is in use
+        :return: NameNotAllowedException if table name is in use
         """
         if (
             fail_if_table_exists
@@ -246,6 +247,10 @@ class CsvImporter(BaseSupersetView):
             raise NameNotAllowedException(message, None)
 
     def _check_database_name(self, db_name: str) -> None:
+        """ Check if database name is already in use
+        :param db_name: the name of database to check
+        :return: NameNotAllowedException if database name is in use
+        """
         if db.session.query(Database).filter_by(database_name=db_name).one_or_none():
             message = _(
                 f"Database name {db_name} already exists. Please choose another"
@@ -260,7 +265,7 @@ class CsvImporter(BaseSupersetView):
         db_flavor -- which database to use postgres or sqlite
 
         Raises:
-            DatabaseFileAlreadyExistsException: If a file with the database name already exists in the folder
+            DatabaseAlreadyExistException: If a file/db with the database name already exists
             NoUserSuppliedException: If the user did not supply a username
             NoPasswordSuppliedException: If the user did not supply a password
             DatabaseCreationException: If the database could not be created
@@ -296,7 +301,7 @@ class CsvImporter(BaseSupersetView):
         """ Setup PostgreSQL specific configuration on database
         :param db_name: the database name of SQLite
         :param database: the database object to configure
-        :return PostgreSQL url
+        :return PostgreSQL url or DatabaseAlreadyExistException if database already exists
         """
         postgresql_user = app.config["POSTGRESQL_USERNAME"]
         if not postgresql_user:
@@ -354,7 +359,7 @@ class CsvImporter(BaseSupersetView):
         """ Set SQlite specific configuration on database
         :param db_name: the database name of SQLite
         :param database: the database object to configure
-        :return SQLite db file path
+        :return SQLite db file path or DatabaseAlreadyExistException if database already exists
         """
         db_path = os.getcwd() + "/" + db_name + ".db"
         if os.path.isfile(db_path):
@@ -368,6 +373,7 @@ class CsvImporter(BaseSupersetView):
         :param database: the database to remove
         :param db_uri: the uri of database (URL or file path)
         :param db_flavor: the kind of database
+        :raise DatabaseDeletionException if database is not deleted
         """
         try:
             if db_uri:
@@ -431,6 +437,8 @@ class CsvImporter(BaseSupersetView):
         Keyword Arguments:
         database -- The database object which will be used for the import
         schema -- the schema to be used for the import
+
+        :return if schema allow csv upload
         """
         if not database.allow_csv_upload:
             return False
@@ -472,6 +480,7 @@ class CsvImporter(BaseSupersetView):
         Keyword arguments:
         table_name -- the name of the table to create
         database -- the database object which will be used
+        schema -- the schema of table
 
         Raises:
             TableCreationException:  1. If the Table object could not be created
@@ -502,13 +511,13 @@ class CsvImporter(BaseSupersetView):
             raise TableCreationException(f"Table {table_name} could not be created.", e)
 
     def _create_and_fill_table_on_system(
-        self, form_data: dict, database: Database, csv_filename: str
+        self, form_data: MultiDict, database: Database, csv_filename: str
     ) -> None:
         """ Fill the table with the data from the csv file
 
         Keyword arguments:
         form_data -- the dictionary containing the properties for the table to be created
-        table -- the table object which will be used
+        database -- the database object which will be used
         csv_filename -- the name of the csv-file to be imported
 
         Raises:
