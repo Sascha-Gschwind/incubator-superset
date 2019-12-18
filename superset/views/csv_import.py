@@ -276,6 +276,12 @@ class CsvImporter(BaseSupersetView):
             db.session.add(database)
             db.session.commit()
             return database, uri
+        except (
+            NoUsernameSuppliedException,
+            NoHostNameSuppliedException,
+            NoPasswordSuppliedException,
+        ) as e:
+            raise e
         except DatabaseAlreadyExistException as e:
             raise DatabaseAlreadyExistException(e.args[0], e)
         except IntegrityError as e:
