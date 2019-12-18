@@ -54,6 +54,10 @@ class CsvException(SupersetException):
         self.orig = orig_e
 
 
+class IdConvertException(CsvException):
+    status = 400
+
+
 class DatabaseFileAlreadyExistsException(CsvException):
     status = 400
 
