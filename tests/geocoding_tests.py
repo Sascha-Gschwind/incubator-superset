@@ -29,6 +29,7 @@ from superset import conf, db
 from superset.connectors.sqla.models import SqlaTable, TableColumn
 from superset.exceptions import TableNotFoundException
 from superset.models.core import Database
+from superset.utils import core as utils
 from superset.utils.geocoders import BaseGeocoder
 from superset.views.geocoding import Geocoder as GeocoderApi
 
@@ -65,7 +66,7 @@ class GeocodingTests(SupersetTestCase):
         self.create_table_in_view()
 
     def create_table_in_view(self):
-        self.test_database = db.session.query(Database).first()
+        self.test_database = utils.get_example_database()
         self.test_database.allow_dml = True
 
         params = {"remote_id": 1234, "database_name": self.test_database.name}
@@ -119,7 +120,7 @@ class GeocodingTests(SupersetTestCase):
 
         # because of caching problem with postgres load database a second time
         # without this, the sqla engine throws an exception
-        database = db.session.query(Database).first()
+        database = utils.get_example_database()
         if database:
             engine = database.get_sqla_engine()
             df.to_sql(

@@ -29,7 +29,6 @@ from superset.connectors.sqla.models import SqlaTable
 from superset.exceptions import (
     DatabaseAlreadyExistException,
     DatabaseCreationException,
-    DatabaseFileAlreadyExistsException,
     IdConvertException,
     NameNotAllowedException,
     NoPasswordSuppliedException,
