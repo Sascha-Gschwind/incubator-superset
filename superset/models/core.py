@@ -1409,25 +1409,25 @@ class DatabaseDto:  # pylint: disable=too-few-public-methods
         self.allowed_schemas = allowed_schemas
 
 
-class TableDto:
-    def __init__(self, id="", name="", schema="", database_id=""):
-        self.id = id
+class TableDto: # pylint: disable=too-few-public-methods
+    def __init__(self, table_id="", name="", schema="", database_id=""):
+        self.table_id = table_id
         self.name = name
         self.schema = schema
         self.database_id = database_id
-        self.fullName = ""
+        self.full_name = ""
         if schema:
-            self.fullName = schema + "."
-        self.fullName += name
+            self.full_name = schema + "."
+        self.full_name += name
 
     def to_json(self):
         values = {}
         dict.__init__(
             values,
-            id=self.id,
+            table_id=self.table_id,
             name=self.name,
             schema=self.schema,
             database_id=self.database_id,
-            fullName=self.fullName,
+            full_name=self.full_name,
         )
         return values

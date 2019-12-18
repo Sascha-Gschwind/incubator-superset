@@ -165,7 +165,12 @@ class Geocoder(BaseSupersetView):
             table_data = self._load_data_from_columns(
                 table, columns, lat_column, lon_column, "append" in if_exists
             )
-        except (NoColumnsException, TableNotFoundException, SqlSelectException, SqlAddColumnException) as e:
+        except (
+            NoColumnsException,
+            TableNotFoundException,
+            SqlSelectException,
+            SqlAddColumnException,
+        ) as e:
             self.stats_logger.incr("geocoding_failed")
             return json_error_response(f"{e.args[0]} {message_suffix}", status=400)
         except Exception as e:
