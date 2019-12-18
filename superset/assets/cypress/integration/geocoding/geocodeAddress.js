@@ -79,6 +79,8 @@ export default () => {
              cy.get('#datasource').then((elem) => {
                  elem.val('0');
              });
+              cy.get('button').contains('Geocode').click();
+            cy.contains("At least one column needs");
                  cy.get('#countryColumn').then((elem) => {
                      elem.val('country_name');
                  });
@@ -88,6 +90,8 @@ export default () => {
 
 
         it ("test3", () => {
+              cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
+            cy.get('#alert-danger').should('not.exist');
             cy.get('#datasource').then((elem) => {
                         elem.val('0');
                     });
