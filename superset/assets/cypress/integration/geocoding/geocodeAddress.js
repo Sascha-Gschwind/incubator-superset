@@ -119,7 +119,7 @@ export default () => {
                      cy.get('button').contains('Geocode').click();
                     cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
         });
-        it ("test3", () => {
+        it ("test4", () => {
               cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
             cy.get('#alert-danger').should('not.exist');
             cy.get('#datasource').then((elem) => {
