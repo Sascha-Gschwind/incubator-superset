@@ -120,7 +120,7 @@ class Geocoder(BaseSupersetView):
         try:
             table = (
                 db.session.query(SqlaTable)
-                .filter_by(id=table_dto.get("id", ""))
+                .filter_by(id=table_dto.get("table_id", ""))
                 .first()
             )
             if table and table.columns:
@@ -149,7 +149,7 @@ class Geocoder(BaseSupersetView):
         if_exists = request_data.get("ifExists")
         save_on_stop_geocoding = request_data.get("saveOnErrorOrInterrupt", True)
         table_dto = request_data.get("datasource", models.TableDto())
-        table_id = table_dto.get("id", "")
+        table_id = table_dto.get("table_id", "")
         message_suffix = ""
         try:
             table = self._get_table_with_columns(table_id)
