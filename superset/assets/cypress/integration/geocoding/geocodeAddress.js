@@ -53,8 +53,10 @@ export default () => {
             cy.get('#datasource').then((elem) => {
                 elem.val('wb_health_population');
             });
+            cy.get('button').contains('Geocode').click();
+            cy.contains("need to select");
             cy.get('#datasource').then((elem) => {
-                elem.val('10');
+                elem.val('1');
             });
             cy.get('button').contains('Geocode').click();
             cy.contains("At least one column needs");
