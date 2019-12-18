@@ -1409,7 +1409,7 @@ class DatabaseDto:  # pylint: disable=too-few-public-methods
         self.allowed_schemas = allowed_schemas
 
 
-class TableDto: # pylint: disable=too-few-public-methods
+class TableDto:  # pylint: disable=too-few-public-methods
     def __init__(self, table_id="", name="", schema="", database_id=""):
         self.table_id = table_id
         self.name = name

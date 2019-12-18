@@ -30,12 +30,13 @@ from superset.exceptions import (
     DatabaseAlreadyExistException,
     DatabaseCreationException,
     DatabaseFileAlreadyExistsException,
+    IdConvertException,
     NameNotAllowedException,
     NoPasswordSuppliedException,
     NoUsernameSuppliedException,
     SchemaNotAllowedCsvUploadException,
     TableCreationException,
-    IdConvertException)
+)
 from superset.utils import core as utils
 from superset.views.csv_import import CsvImporter
 from tests.test_app import app

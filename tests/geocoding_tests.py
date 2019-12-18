@@ -186,14 +186,11 @@ class GeocodingTests(SupersetTestCase):
 
         response = self.get_resp(url, json_=data)
 
-        error_message = f"No columns found for table with name {table_dto.name}"
+        error_message = "No columns found for table with name undefined"
         assert error_message in response
 
     def test_does_valid_column_name_exist(self):
-        columns = reflection.Inspector.from_engine(db.engine).get_columns(
-            self.test_table.table_name
-        )
-        column_name = columns[0].get("name")
+        column_name = self.test_table.columns[0].column_name
 
         response = GeocoderApi()._does_column_name_exist(self.test_table, column_name)
         assert True is response
