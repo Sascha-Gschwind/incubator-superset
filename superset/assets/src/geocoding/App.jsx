@@ -36,10 +36,7 @@ const tables = bootstrapData.tables;
 const store = createStore(
   rootReducer,
   {},
-  compose(
-    applyMiddleware(thunk, logger),
-    initEnhancer(false),
-  ),
+  compose(applyMiddleware(thunk, logger), initEnhancer(false)),
 );
 
 const App = () => (

@@ -18,77 +18,91 @@
  */
 import { SupersetClient } from '@superset-ui/connection';
 import getClientErrorObject from 'src/utils/getClientErrorObject';
-import { addStatusMessage, STATUS_TYPE } from 'src/components/StatusMessages/actions/statusMessages';
+import {
+  addStatusMessage,
+  STATUS_TYPE,
+} from 'src/components/StatusMessages/actions/statusMessages';
 
 export const GET_COLUMNS_FOR_TABLE_SUCCESS = 'GET_COLUMNS_FOR_TABLE_SUCCESS';
 
 export const GEOCODE_PROGRESS_SUCCESS = 'GEOCODE_PROGRESS_SUCCESS';
 
 export function getColumnsForTable(table) {
-    return dispatch =>
+  return dispatch =>
     SupersetClient.post({
       endpoint: '/geocoder/geocoding/columns',
       body: JSON.stringify({ table }),
       headers: { 'Content-Type': 'application/json' },
     })
-      .then((response) => {
-        dispatch({ type: GET_COLUMNS_FOR_TABLE_SUCCESS, columnList: response.json });
+      .then(response => {
+        dispatch({
+          type: GET_COLUMNS_FOR_TABLE_SUCCESS,
+          columnList: response.json,
+        });
       })
-      .catch((response) => {
-        getClientErrorObject(response).then((error) => {
+      .catch(response => {
+        getClientErrorObject(response).then(error => {
           dispatch(addStatusMessage(error.error, STATUS_TYPE.ERROR));
         });
       });
 }
 
 export function resetColumnsForTable() {
-  return dispatch => dispatch({ type: GET_COLUMNS_FOR_TABLE_SUCCESS, columnList: [] });
+  return dispatch =>
+    dispatch({ type: GET_COLUMNS_FOR_TABLE_SUCCESS, columnList: [] });
 }
 
 export function geocodingProgress() {
   return dispatch =>
-  SupersetClient.get({
-    endpoint: '/geocoder/geocoding/progress',
-  })
-    .then((response) => {
-      dispatch({ type: GEOCODE_PROGRESS_SUCCESS, progress: response.json });
+    SupersetClient.get({
+      endpoint: '/geocoder/geocoding/progress',
     })
-    .catch((response) => {
-      getClientErrorObject(response).then((error) => {
-        dispatch(addStatusMessage(error.error, STATUS_TYPE.ERROR));
+      .then(response => {
+        dispatch({ type: GEOCODE_PROGRESS_SUCCESS, progress: response.json });
+      })
+      .catch(response => {
+        getClientErrorObject(response).then(error => {
+          dispatch(addStatusMessage(error.error, STATUS_TYPE.ERROR));
+        });
       });
-    });
 }
 
 export function geocode(data) {
-    return dispatch =>
+  return dispatch =>
     SupersetClient.post({
       endpoint: '/geocoder/geocoding/geocode',
       body: JSON.stringify(data),
       headers: { 'Content-Type': 'application/json' },
     })
       .then(() => {
-        dispatch(addStatusMessage('Geocoding successfully ended.', STATUS_TYPE.INFO));
+        dispatch(
+          addStatusMessage('Geocoding successfully ended.', STATUS_TYPE.INFO),
+        );
         dispatch(geocodingProgress());
         window.open('/tablemodelview/list/', '_self');
       })
-      .catch((response) => {
-        getClientErrorObject(response).then((error) => {
+      .catch(response => {
+        getClientErrorObject(response).then(error => {
           dispatch(addStatusMessage(error.error, STATUS_TYPE.ERROR));
         });
       });
 }
 
 export function interruptGeocoding() {
-    return dispatch =>
+  return dispatch =>
     SupersetClient.post({
       endpoint: '/geocoder/geocoding/interrupt',
     })
       .then(() => {
-        dispatch(addStatusMessage('Geocoding successfully interrupted.', STATUS_TYPE.INFO));
+        dispatch(
+          addStatusMessage(
+            'Geocoding successfully interrupted.',
+            STATUS_TYPE.INFO,
+          ),
+        );
       })
-      .catch((response) => {
-        getClientErrorObject(response).then((error) => {
+      .catch(response => {
+        getClientErrorObject(response).then(error => {
           dispatch(addStatusMessage(error.error, STATUS_TYPE.ERROR));
         });
       });

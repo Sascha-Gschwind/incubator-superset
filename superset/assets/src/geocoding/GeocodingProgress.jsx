@@ -44,7 +44,7 @@ export class GeocodingProgress extends React.Component {
 
   getProgress() {
     if (this.props.geocoding && this.props.geocoding.progress) {
-        return this.calculateProgress(this.props.geocoding.progress.progress);
+      return this.calculateProgress(this.props.geocoding.progress.progress);
     }
     return 0;
   }
@@ -71,12 +71,12 @@ export class GeocodingProgress extends React.Component {
   }
 
   calculateProgress(progress) {
-      return Math.round(progress * 100);
+    return Math.round(progress * 100);
   }
 
   interruptGeocoding() {
-      this.props.actions.interruptGeocoding();
-      setTimeout(this.props.actions.geocodingProgress, 100);
+    this.props.actions.interruptGeocoding();
+    setTimeout(this.props.actions.geocodingProgress, 100);
   }
 
   render() {
@@ -87,12 +87,22 @@ export class GeocodingProgress extends React.Component {
         </div>
         <div id="Home" className="tab-pane active">
           <div className="progressContainer">
-            <p>{t('The geocoding is currently in progress, this may take a while!')}</p>
-            <ProgressBar striped now={this.getProgress()} label={`${this.getProgress()} %`} />
+            <p>
+              {t(
+                'The geocoding is currently in progress, this may take a while!',
+              )}
+            </p>
+            <ProgressBar
+              striped
+              now={this.getProgress()}
+              label={`${this.getProgress()} %`}
+            />
             <p className="success">Success: {this.getSuccessCounter()}</p>
             <p className="doubt">Doubt: {this.getDoubtCounter()}</p>
             <p className="failed">Failed: {this.getFailedCounter()}</p>
-            <p>{t('You can cancel the process by clicking on the Cancel button')}</p>
+            <p>
+              {t('You can cancel the process by clicking on the Cancel button')}
+            </p>
             <Button bsStyle="danger" onClick={this.interruptGeocoding}>
               {t('Stop Geocoding')} <i className="fa fa-ban" />
             </Button>
@@ -119,7 +129,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(GeocodingProgress);
+export default connect(mapStateToProps, mapDispatchToProps)(GeocodingProgress);

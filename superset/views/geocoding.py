@@ -27,7 +27,7 @@ from sqlalchemy import Column, Float, text
 from sqlalchemy.engine import Connection
 
 import superset.models.core as models
-from superset import appbuilder, conf, db, security_manager
+from superset import app, appbuilder, db, security_manager
 from superset.connectors.sqla.models import SqlaTable, TableColumn
 from superset.exceptions import (
     NoAPIKeySuppliedException,
@@ -39,15 +39,21 @@ from superset.exceptions import (
 )
 from superset.utils.geocoders import BaseGeocoder, GoogleGeocoder, MapTilerGeocoder
 
-from .base import api, BaseSupersetView, json_error_response, json_success
+from .base import (
+    api,
+    BaseSupersetView,
+    common_bootstrap_payload,
+    json_error_response,
+    json_success,
+)
 
 
 class Geocoder(BaseSupersetView):
     """Geocoding methods and API!"""
 
     # Variables for geocoding
-    geocoder = BaseGeocoder(conf)
-    stats_logger = conf["STATS_LOGGER"]
+    geocoder = BaseGeocoder(app.config)
+    stats_logger = app.config["STATS_LOGGER"]
     logger = logging.getLogger(__name__)
 
     @has_access
@@ -59,7 +65,7 @@ class Geocoder(BaseSupersetView):
         """
         bootstrap_data = {
             "tables": self._get_editable_tables(),
-            "common": self.common_bootstrap_payload(),
+            "common": common_bootstrap_payload(),
         }
 
         if request.args.get("json") == "true":
@@ -191,7 +197,7 @@ class Geocoder(BaseSupersetView):
         try:
             geocoded_values = message_with_geocoded_values[1]
             # It is possible that no exception occured but no geocoded values are returned check for this
-            if len(geocoded_values[0]) == 0:
+            if "append" in if_exists and geocoded_values[0] == 0:
                 return json_error_response(
                     f"No geocoded values received {message_suffix}"
                 )
@@ -333,9 +339,9 @@ class Geocoder(BaseSupersetView):
         :return: The data from columns from given table as list of tuples
         :raise SqlSelectException: When SELECT from given columns went wrong
         """
+        column_list = ", ".join(columns)
         try:
             full_table_name = self._get_from_clause(table)
-            column_list = ", ".join(columns)
             sql = f"SELECT {column_list} FROM {full_table_name}"
             if is_append:
                 sql += f" WHERE {lat_column} IS NULL OR {lon_column} IS NULL"
@@ -355,9 +361,9 @@ class Geocoder(BaseSupersetView):
         """
         if geocoder_name:
             if geocoder_name.lower() == "maptiler":
-                self.geocoder = MapTilerGeocoder(conf)
+                self.geocoder = MapTilerGeocoder(app.config)
             if geocoder_name.lower() == "google":
-                self.geocoder = GoogleGeocoder(conf)
+                self.geocoder = GoogleGeocoder(app.config)
 
     def _geocode(self, data: list):
         """

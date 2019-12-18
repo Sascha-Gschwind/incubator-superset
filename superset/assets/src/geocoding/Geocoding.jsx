@@ -101,7 +101,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(Geocoding);
+export default connect(mapStateToProps, mapDispatchToProps)(Geocoding);

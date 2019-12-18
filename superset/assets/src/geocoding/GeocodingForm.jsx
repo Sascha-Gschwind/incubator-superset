@@ -291,7 +291,7 @@ export class GeocodingForm extends React.Component {
                           onChange={value =>
                             this.setPropertyValue('buildingNumberColumn', value)
                           }
-                          value={this.state.countryColumn}
+                          value={this.state.buildingNumberColumn}
                           helpText={t(
                             'Name of the column where the building number is stored.',
                           )}
@@ -431,7 +431,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(GeocodingForm);
+export default connect(mapStateToProps, mapDispatchToProps)(GeocodingForm);

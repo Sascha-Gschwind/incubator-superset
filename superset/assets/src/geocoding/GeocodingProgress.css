@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- .progressContainer {
-    margin: 15px;
-  }
+.progressContainer {
+  margin: 15px;
+}
 
 .spacer {
-    padding: 10px;
+  padding: 10px;
 }
 
 .success {

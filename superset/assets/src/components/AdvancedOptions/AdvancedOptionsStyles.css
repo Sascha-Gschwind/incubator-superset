@@ -17,31 +17,31 @@
  * under the License.
  */
 .title {
-    text-align: left;
-    border-bottom: 1px solid #b3b3b3;
-    line-height: 0.1em;
-    margin: 10px 0 20px;
+  text-align: left;
+  border-bottom: 1px solid #b3b3b3;
+  line-height: 0.1em;
+  margin: 10px 0 20px;
 }
 .title span {
-    background: #fff;
-    font-weight: bold;
-    padding: 0 10px 0 0;
-    cursor: pointer;
+  background: #fff;
+  font-weight: bold;
+  padding: 0 10px 0 0;
+  cursor: pointer;
 }
 .title span:before {
-   font-family: FontAwesome;
-   display: inline-block;
-   padding-right: 6px;
-   vertical-align: middle;
-   color: #b3b3b3;
-   content: "\f078";
+  font-family: FontAwesome;
+  display: inline-block;
+  padding-right: 6px;
+  vertical-align: middle;
+  color: #b3b3b3;
+  content: '\f078';
 }
 .closeTitle span:before {
-   content: "\f077";
+  content: '\f077';
 }
 .openTitle span:before {
-   content: "\f078";
+  content: '\f078';
 }
 .hide {
-    display: none;
+  display: none;
 }
