@@ -85,10 +85,11 @@ export default () => {
               if(cy.contains("You need to select a datasource")) {
                   cy.get('#datasource').val == 0;
               }
-            cy.contains("At least one column needs");
-                 cy.get('#countryColumn').then((elem) => {
-                     elem.val('country_name');
-                 });
+            if (!cy.contains("At least one column needs")){
+                cy.get('#countryColumn').then((elem) => {
+                    elem.val('country_name');
+                });
+            }
                  cy.get('button').contains('Geocode').click();
             cy.url({ timeout: 30000 }).should('include', '/tablemodelview/list');
             });
@@ -101,13 +102,14 @@ export default () => {
                         elem.val('0');
                     });
                     cy.get('button').contains('Geocode').click();
-                    cy.contains("At least one column needs");
-                    cy.log ("contained at least one column needed");
+
                     cy.wait(500);
                     // problem here probably since it's disabled until we select a datasource
-                    cy.get('#countryColumn').then((elem) => {
-                        elem.val('country_name');
-                    });
+            if (!cy.contains("At least one column needs")) {
+                cy.get('#countryColumn').then((elem) => {
+                    elem.val('0');
+                });
+            }
                     cy.log("found countryColumn");
 
                     cy.get('#geocoder').then((elem) => {
