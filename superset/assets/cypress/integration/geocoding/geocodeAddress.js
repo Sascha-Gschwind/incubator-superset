@@ -50,13 +50,10 @@ export default () => {
         it('test geocoding of simple data', () => {
             cy.url({timeout:3000}).should('include', 'geocoder/geocoding');
             cy.get('#alert-danger').should('not.exist');
-            cy.get('#datasource').then((elem) => {
-                elem.val('wb_health_population');
-            });
             cy.get('button').contains('Geocode').click();
             cy.contains("need to select");
             cy.get('#datasource').then((elem) => {
-                elem.val('1');
+                elem.val('0');
             });
             cy.get('button').contains('Geocode').click();
             cy.contains("At least one column needs");
