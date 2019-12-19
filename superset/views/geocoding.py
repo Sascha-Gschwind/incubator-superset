@@ -423,7 +423,9 @@ class Geocoder(BaseSupersetView):
         :param column_type: The type of the column
         """
         column = Column(column_name, column_type)
-        name = column.compile(column_name, dialect=table.database.get_sqla_engine().dialect)
+        name = column.compile(
+            column_name, dialect=table.database.get_sqla_engine().dialect
+        )
         col_type = column.type.compile(table.database.get_sqla_engine().dialect)
         sql = text(f"ALTER TABLE {self._get_from_clause(table)} ADD {name} {col_type}")
         connection.execute(sql)
