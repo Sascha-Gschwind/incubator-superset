@@ -25,8 +25,9 @@ def get_env_variable(var_name, default=None):
         if default is not None:
             return default
         else:
-            error_msg = 'The environment variable {} was missing, abort...'\
-                        .format(var_name)
+            error_msg = "The environment variable {} was missing, abort...".format(
+                var_name
+            )
             raise EnvironmentError(error_msg)
 
 
@@ -43,15 +44,15 @@ SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s:%s/%s' % (POSTGRESQL_USER,
                                                            POSTGRESQL_PORT,
                                                            POSTGRESQL_DB)
 
-REDIS_HOST = get_env_variable('REDIS_HOST')
-REDIS_PORT = get_env_variable('REDIS_PORT')
+REDIS_HOST = get_env_variable("REDIS_HOST")
+REDIS_PORT = get_env_variable("REDIS_PORT")
 
 
 class CeleryConfig(object):
-    BROKER_URL = 'redis://%s:%s/0' % (REDIS_HOST, REDIS_PORT)
-    CELERY_IMPORTS = ('superset.sql_lab', )
-    CELERY_RESULT_BACKEND = 'redis://%s:%s/1' % (REDIS_HOST, REDIS_PORT)
-    CELERY_ANNOTATIONS = {'tasks.add': {'rate_limit': '10/s'}}
+    BROKER_URL = "redis://%s:%s/0" % (REDIS_HOST, REDIS_PORT)
+    CELERY_IMPORTS = ("superset.sql_lab",)
+    CELERY_RESULT_BACKEND = "redis://%s:%s/1" % (REDIS_HOST, REDIS_PORT)
+    CELERY_ANNOTATIONS = {"tasks.add": {"rate_limit": "10/s"}}
     CELERY_TASK_PROTOCOL = 1
 
 

@@ -22,6 +22,7 @@ from . import (
     csv_import,
     dashboard,
     datasource,
+    geocoding,
     schedules,
     sql_lab,
     tags,

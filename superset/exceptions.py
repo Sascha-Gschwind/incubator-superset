@@ -14,14 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-# pylint: disable=C,R,W
 
 
 class SupersetException(Exception):
     status = 500
-
-    def __init__(self, msg):
-        super(SupersetException, self).__init__(msg)
 
 
 class SupersetTimeoutException(SupersetException):
@@ -56,6 +52,10 @@ class CsvException(SupersetException):
     def __init__(self, msg, orig_e):
         super(CsvException, self).__init__(msg)
         self.orig = orig_e
+
+
+class IdConvertException(CsvException):
+    status = 400
 
 
 class DatabaseFileAlreadyExistsException(CsvException):
@@ -111,4 +111,36 @@ class TableCreationException(CsvException):
 
 
 class InvalidURIException(SupersetException):
+    status = 400
+
+
+class SqlException(SupersetException):
+    def __init__(self, msg, orig_e):
+        super(SqlException, self).__init__(msg)
+        self.orig = orig_e
+
+    status = 500
+
+
+class TableNotFoundException(SupersetException):
+    status = 400
+
+
+class NoColumnsException(SupersetException):
+    status = 400
+
+
+class SqlSelectException(SqlException):
+    status = 500
+
+
+class SqlAddColumnException(SqlException):
+    status = 500
+
+
+class SqlUpdateException(SqlException):
+    status = 500
+
+
+class NoAPIKeySuppliedException(SupersetException):
     status = 400
