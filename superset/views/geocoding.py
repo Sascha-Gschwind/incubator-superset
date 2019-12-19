@@ -145,14 +145,14 @@ class Geocoder(BaseSupersetView):
         self._set_geocoder(request_data.get("geocoder", ""))
         lat_column = request_data.get("latitudeColumnName", "lat")
         lon_column = request_data.get("longitudeColumnName", "lon")
-        columns = self._create_column_list(request_data)
-        if_exists = request_data.get("ifExists")
-        save_on_stop_geocoding = request_data.get("saveOnErrorOrInterrupt", True)
         table_dto = request_data.get("datasource", models.TableDto())
         table_id = table_dto.get("table_id", "")
+        if_exists = request_data.get("ifExists")
+        save_on_stop_geocoding = request_data.get("saveOnErrorOrInterrupt", True)
         message_suffix = ""
         try:
             table = self._get_table_with_columns(table_id)
+            columns = self._create_column_list(request_data, table)
             lat_exists = self._does_column_name_exist(table, lat_column)
             lon_exists = self._does_column_name_exist(table, lon_column)
             if "fail" in if_exists and (lat_exists or lon_exists):
@@ -231,7 +231,7 @@ class Geocoder(BaseSupersetView):
         self.stats_logger.incr("succesful_geocoding")
         return json_success('"OK"')
 
-    def _create_column_list(self, request_data: dict) -> list:
+    def _create_column_list(self, request_data: dict, table: SqlaTable) -> list:
         """
         Create a list of column names from the given columns from request
         :param request_data: data sent by the request
@@ -264,6 +264,17 @@ class Geocoder(BaseSupersetView):
         else:
             full_table_name = quote(table.table_name)
         return text(full_table_name)
+
+    def _get_columns_quoted(self, table: SqlaTable, columns: list) -> list:
+        quote = table.database.get_sqla_engine().dialect.identifier_preparer.quote
+        quoted_columns = []
+        for column in columns:
+            quoted_columns.append(quote(column))
+        return quoted_columns
+
+    def _get_columns_string(self, table: SqlaTable, columns: list) -> str:
+        quoted_columns = self._get_columns_quoted(table, columns)
+        return ", ".join(quoted_columns)
 
     def _create_columns(
         self,
@@ -348,7 +359,7 @@ class Geocoder(BaseSupersetView):
         :return: The data from columns from given table as list of tuples
         :raise SqlSelectException: When SELECT from given columns went wrong
         """
-        column_list = ", ".join(columns)
+        column_list = self._get_columns_string(table, columns)
         try:
             full_table_name = self._get_from_clause(table)
             sql = f"SELECT {column_list} FROM {full_table_name}"
@@ -423,7 +434,9 @@ class Geocoder(BaseSupersetView):
         :param data: row with geographical data and geocoded coordinates
         :raise SqlUpdateException: When update of given columns with given data went wrong
         """
-        where_clause = "='%s' AND ".join(geo_columns) + "='%s'"
+        quoted_columns = self._get_columns_quoted(table, geo_columns)
+        lat_lon_quoted = self._get_columns_quoted(table, [lat_column, lon_column])
+        where_clause = "='%s' AND ".join(quoted_columns) + "='%s'"
         lat_column_index = len(geo_columns)
 
         connection = table.database.get_sqla_engine().connect()
@@ -431,8 +444,8 @@ class Geocoder(BaseSupersetView):
         try:
             for row in data:
                 update = (
-                    f"UPDATE {self._get_from_clause(table)} SET {lat_column}={row[lat_column_index]}, "
-                    f"{lon_column}={row[lat_column_index + 1]} "
+                    f"UPDATE {self._get_from_clause(table)} SET {lat_lon_quoted[0]}={row[lat_column_index]}, "
+                    f"{lat_lon_quoted[1]}={row[lat_column_index + 1]} "
                 )
                 where = "WHERE " + where_clause % (tuple(row[:lat_column_index]))
                 connection.execute(text(update + where))
