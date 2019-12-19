@@ -266,6 +266,12 @@ class Geocoder(BaseSupersetView):
         return text(full_table_name)
 
     def _get_columns_quoted(self, table: SqlaTable, columns: list) -> list:
+        """
+        Quote columns depending on db_engine
+        :param table: The SqlaTable
+        :param columns: The list of columns that maybe need quoting
+        :return: A list of column names that are quoted if they need to be
+        """
         quote = table.database.get_sqla_engine().dialect.identifier_preparer.quote
         quoted_columns = []
         for column in columns:
@@ -273,6 +279,12 @@ class Geocoder(BaseSupersetView):
         return quoted_columns
 
     def _get_columns_string(self, table: SqlaTable, columns: list) -> str:
+        """
+        Get a column string that is quoted depending on db_engine
+        :param table: The SqlaTable
+        :param columns: The list of columns that maybe need quoting
+        :return: A string containing a comma separated list of column names that are quoted if they need to be
+        """
         quoted_columns = self._get_columns_quoted(table, columns)
         return ", ".join(quoted_columns)
 
@@ -301,6 +313,7 @@ class Geocoder(BaseSupersetView):
                 self._add_column(connection, table, lat_column, Float())
             if not lon_exists:
                 self._add_column(connection, table, lon_column, Float())
+            transaction.commit()
         except Exception as e:
             transaction.rollback()
             self.logger.exception(f"Exception while adding columns {e}")
