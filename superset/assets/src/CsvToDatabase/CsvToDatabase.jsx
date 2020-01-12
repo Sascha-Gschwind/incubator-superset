@@ -264,7 +264,7 @@ export class CsvToDatabase extends React.PureComponent {
                       >
                         <FileDropper
                           onFileSelected={this.setFile}
-                          allowedMimeTypes={['text/csv']}
+                          allowedMimeTypes={['text/csv', 'application/vnd.ms-excel', 'text/x-csv', 'text/plain']}
                           isRequired
                         >
                           <DropArea
