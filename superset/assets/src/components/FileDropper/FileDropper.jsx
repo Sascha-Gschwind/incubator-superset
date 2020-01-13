@@ -117,6 +117,11 @@ export default class FileDropper extends React.Component {
     }
 
     if (files.length > 0) {
+      const dataTransfer = new DataTransfer();
+      for (const file of files) {
+        dataTransfer.items.add(file);
+      }
+      this.fileRef.files = dataTransfer.files;
       this.props.onFileSelected(files);
     }
   }
